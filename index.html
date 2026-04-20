@@ -1,10 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-    <title>我的網站</title>
+<meta charset="UTF-8">
+<title>我的個人網站</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+}
+
+/* 上方標題區 */
+header {
+    background: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 40px;
+}
+
+/* 導覽列 */
+nav {
+    background: #34495e;
+    text-align: center;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+}
+
+/* 內容區 */
+section {
+    max-width: 900px;
+    margin: 30px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* 區塊標題 */
+h2 {
+    color: #2c3e50;
+}
+
+/* 技能條 */
+.skill {
+    background: #ddd;
+    border-radius: 20px;
+    margin: 10px 0;
+}
+
+.skill-bar {
+    height: 20px;
+    background: #3498db;
+    border-radius: 20px;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+}
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #2c3e50;
+    color: white;
+    margin-top: 30px;
+}
+</style>
+
 </head>
+
 <body>
-    <h1>Hello World</h1>
-    <p>這是我的第一個網站</p>
+
+<header>
+    <h1>你好，我是 XXX</h1>
+    <p>資工系學生 | 學習網頁與程式設計中</p>
+</header>
+
+<nav>
+    <a href="#about">關於我</a>
+    <a href="#skills">技能</a>
+    <a href="#contact">聯絡我</a>
+</nav>
+
+<section id="about">
+    <h2>👤 關於我</h2>
+    <p>
+        我目前正在學習網頁設計、Python 與網路爬蟲。
+        希望未來可以成為一名軟體工程師，並參與有趣的專案開發。
+    </p>
+</section>
+
+<section id="skills">
+    <h2>💻 技能</h2>
+
+    HTML
+    <div class="skill">
+        <div class="skill-bar" style="width: 80%;">80%</div>
+    </div>
+
+    CSS
+    <div class="skill">
+        <div class="skill-bar" style="width: 70%;">70%</div>
+    </div>
+
+    Python
+    <div class="skill">
+        <div class="skill-bar" style="width: 75%;">75%</div>
+    </div>
+
+</section>
+
+<section id="contact">
+    <h2>📩 聯絡我</h2>
+    <p>Email：example@gmail.com</p>
+    <p>GitHub：github.com/yourname</p>
+</section>
+
+<footer>
+    © 2026 我的個人網站 | Made by Me
+</footer>
+
 </body>
 </html>
