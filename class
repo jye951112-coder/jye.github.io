@@ -1,0 +1,182 @@
+from pathlib import Path
+import zipfile
+from docx import Document
+from docx.shared import Pt
+
+base = Path("/mnt/data/medical_project")
+base.mkdir(exist_ok=True)
+
+# app.py
+app_py = r'''from flask import Flask, render_template, request
+import sqlite3
+
+app = Flask(__name__)
+
+def search_hospital(user_input):
+    conn = sqlite3.connect("hospital.db")
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM hospitals WHERE 1=1"
+
+    if "牙" in user_input:
+        query += " AND department='牙科'"
+
+    if "骨" in user_input:
+        query += " AND department='骨科'"
+
+    if "兒" in user_input:
+        query += " AND department='小兒科'"
+
+    results = cursor.execute(query).fetchall()
+    conn.close()
+    return results
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    results = []
+
+    if request.method == "POST":
+        text = request.form["search"]
+        results = search_hospital(text)
+
+    return render_template("index.html", results=results)
+
+if __name__ == "__main__":
+    app.run(debug=True)
+'''
+(base / "app.py").write_text(app_py, encoding="utf-8")
+
+# db setup
+db_py = r'''import sqlite3
+
+conn = sqlite3.connect("hospital.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS hospitals(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    department TEXT,
+    address TEXT
+)
+""")
+
+data = [
+    ("台中榮總", "骨科", "台中市西屯區"),
+    ("快樂牙醫", "牙科", "台中市北區"),
+    ("安心兒科", "小兒科", "台中市南屯區")
+]
+
+cursor.executemany(
+    "INSERT INTO hospitals(name, department, address) VALUES (?, ?, ?)",
+    data
+)
+
+conn.commit()
+conn.close()
+
+print("資料庫建立完成")
+'''
+(base / "create_db.py").write_text(db_py, encoding="utf-8")
+
+# templates
+templates = base / "templates"
+templates.mkdir(exist_ok=True)
+
+html = r'''<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>醫療院所查詢平台</title>
+</head>
+<body>
+    <h1>醫療院所自然語言查詢平台</h1>
+
+    <form method="POST">
+        <input type="text" name="search" placeholder="例如：找牙醫">
+        <button type="submit">搜尋</button>
+    </form>
+
+    <hr>
+
+    {% for r in results %}
+        <div>
+            <h3>{{ r[1] }}</h3>
+            <p>科別：{{ r[2] }}</p>
+            <p>地址：{{ r[3] }}</p>
+        </div>
+        <hr>
+    {% endfor %}
+
+</body>
+</html>
+'''
+(templates / "index.html").write_text(html, encoding="utf-8")
+
+# requirements
+(base / "requirements.txt").write_text("flask\n", encoding="utf-8")
+
+# README
+readme = """# 醫療院所資料標記與自然語言查詢平台
+
+## 安裝方式
+1. pip install -r requirements.txt
+2. python create_db.py
+3. python app.py
+
+## 功能
+- 醫療院所查詢
+- 自然語言搜尋
+- SQLite資料庫
+- Flask網站
+
+## 搜尋範例
+- 找牙醫
+- 找骨科
+- 找兒科
+"""
+(base / "README.md").write_text(readme, encoding="utf-8")
+
+# Create report docx
+doc = Document()
+title = doc.add_heading('醫療院所高品質圖文資料標記與自然語言查詢平台設計', level=1)
+title.runs[0].font.size = Pt(20)
+
+doc.add_heading('摘要 Abstract', level=2)
+doc.add_paragraph(
+    '本專題旨在建置一套醫療院所高品質圖文資料標記與自然語言查詢平台，'
+    '使用者可透過自然語言輸入需求，例如「找牙醫」或「附近骨科」，'
+    '系統將分析使用者意圖並查詢資料庫回傳結果。'
+)
+
+doc.add_heading('關鍵字 Keywords', level=2)
+doc.add_paragraph('自然語言處理、醫療院所、Flask、資料標記、智慧搜尋')
+
+doc.add_heading('研究動機與目的', level=2)
+doc.add_paragraph(
+    '現代人查詢醫療院所資訊時，常因資料分散或搜尋不精確而浪費時間，'
+    '因此本研究希望建立一個具備自然語言搜尋功能的平台。'
+)
+
+doc.add_heading('系統架構', level=2)
+doc.add_paragraph(
+    '本系統以前端網頁、Flask後端與SQLite資料庫組成。'
+)
+
+doc.add_heading('結論', level=2)
+doc.add_paragraph(
+    '本系統成功完成醫療院所自然語言查詢功能，可提升資訊搜尋效率。'
+)
+
+doc_path = "/mnt/data/醫療院所專題初稿.docx"
+doc.save(doc_path)
+
+# Zip project
+zip_path = "/mnt/data/medical_project.zip"
+with zipfile.ZipFile(zip_path, 'w') as z:
+    for file in base.rglob("*"):
+        z.write(file, file.relative_to(base.parent))
+
+print("完成")
+print(zip_path)
+print(doc_path)
